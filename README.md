@@ -179,6 +179,6 @@ After this, the project will be running on your localhost. Typically at http://l
 
 ## Authors
 
-Juan Alfonso Q. Magpantay - Metacrafters 
+Abhay Rana
 
 
