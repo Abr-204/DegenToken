@@ -1,184 +1,76 @@
-# Degen Token (ERC-20): Unlocking the Future of Gaming
+# DegenToken Contract
 
-Degen Token, an ERC-20 on Avalanche, transforms gaming by offering versatile features like minting, transfers, and in-game redemptions. This token adheres to ERC-20 standards for seamless integration across platforms, shaping a dynamic and rewarding future for the gaming community.
+The DegenToken contract is an ERC20 token smart contract that enables various functionalities for players in the Degen Gaming platform. The contract is designed to provide the following features:
 
-## Description
+- Minting new tokens: The platform owner can create new tokens and distribute them as rewards to players. Only the contract owner has the authority to mint tokens.
 
-Degen Token, an ERC-20 standard token on the Avalanche network, is revolutionizing the gaming experience. This versatile digital asset empowers players with features like minting, transfers, and in-game redemptions. By adhering to ERC-20 standards, Degen Token ensures compatibility and usability across diverse platforms. It stands as a beacon in the future of gaming, where blockchain technology and player-centric features converge to create a dynamic and rewarding gaming ecosystem.
+- Transferring tokens: Players can transfer their tokens to others. They can initiate token transfers to any address by specifying the recipient and the amount of tokens they wish to transfer.
 
-## Getting Started
+- Redeeming tokens: Players can redeem their tokens for items in the in-game store. The contract provides a list of available items that can be redeemed using the corresponding token values.
 
-### Executing program
-To run this program, you can use remix, an online Solidity IDE. Go to this remix website to start 
-https://remix.ethereum.org/#lang=en&optimize=false&runs=200&evmVersion=null&version=soljson-v0.8.23+commit.f704f362.js
+- Checking token balance: Players can check their token balance at any time by calling the `checkBalance` function. It returns the balance of tokens held by the caller's address.
 
-At the gitpod website go to idex to run this program. Save this file by clicking the right corner of the window and with the black paper symbol. Save the file named DegenToken.sol and copy paste the code
+- Burning tokens: Any token holder can burn their own tokens if they are no longer needed. The `burnTokens` function allows token holders to burn a specific amount of tokens from their own balance.
+
+## Contract Details
+
+- SPDX-License-Identifier: MIT
+- Solidity Version: ^0.8.18
+
+## Functions
+
+### mint
+
+```solidity
+function mint(address to, uint256 amount) public onlyOwner
 ```
-/*
-1. Minting new tokens: The platform should be able to create new tokens and distribute them to players as 2. rewards. Only the owner can mint tokens.
-3. Transferring tokens: Players should be able to transfer their tokens to others.
-4. Redeeming tokens: Players should be able to redeem their tokens for items in the in-game store.
-5. Checking token balance: Players should be able to check their token balance at any time.
-6. Burning tokens: Anyone should be able to burn tokens, that they own, that are no longer needed.
-*/
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+The `mint` function allows the contract owner to create new tokens and distribute them to specified addresses. It takes two parameters: `to` (the recipient's address) and `amount` (the number of tokens to mint). Only the contract owner can call this function.
 
-contract DegenToken is ERC20, Ownable {
-    
-    uint256 public constant REDEMPTION_RATE = 100;
+### transferTokens
 
-    mapping(address => uint256) public swordsOwned;
-
-    constructor() ERC20("Degen", "DGN") Ownable(msg.sender) {
-        _mint(msg.sender, 10 * (10 ** uint256(decimals())));
-    }
-
-    function redeemSword(uint256 quantity) public {
-        uint256 cost = REDEMPTION_RATE * quantity;
-        require(balanceOf(msg.sender) >= cost, "Not enough tokens to redeem for a sword");
-
-        swordsOwned[msg.sender] += quantity;
-        _burn(msg.sender, cost);
-    }
-
-    function checkSwordsOwned(address user) public view returns (uint256) {
-        return swordsOwned[user];
-    }
-
-    function mintTokens(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
-    }
-
-    function checkBalance(address account) public view returns (uint256) {
-        return balanceOf(account);
-    }
-
-    function burnTokens(uint256 amount) public {
-        require(balanceOf(msg.sender) >= amount, "Not enough tokens to burn");
-        _burn(msg.sender, amount);
-    }
-
-    function transferTokens(address to, uint256 amount) public {
-        require(to != address(0), "Invalid address");
-        require(balanceOf(msg.sender) >= amount, "Not enough tokens to transfer");
-        _transfer(msg.sender, to, amount);
-    }
-}
+```solidity
+function transferTokens(address _receiver, uint amount) external
 ```
-To successfully deploy the contract to snowtrace:
 
-.open vs code
-.enter: cd (your-project)
-.enter: npm init -y
-.enter: npm install --save-dev hardhat
-.enter: npm install @openzeppelin/contracts
-.Delete the existing module.exports code and add the following code to your hardhat.config.js file. This will enable us to test our smart contracts on the local network with data from Avalanche Mainnet.
+The `transferTokens` function enables players to transfer their tokens to others. Players can initiate transfers by providing the recipient's address (`_receiver`) and the amount of tokens (`amount`) to transfer. This function requires that the caller has a sufficient balance of tokens.
 
+### checkBalance
+
+```solidity
+function checkBalance() external view returns (uint)
 ```
-const FORK_FUJI = false
-const FORK_MAINNET = false
-let forkingData = undefined;
 
-if (FORK_MAINNET) {
-  forkingData = {
-    url: 'https://api.avax.network/ext/bc/C/rpcc',
-  }
-}
-if (FORK_FUJI) {
-  forkingData = {
-    url: 'https://api.avax-test.network/ext/bc/C/rpc',
-  }
-}
+The `checkBalance` function allows players to check their token balance at any time. It returns the balance of tokens held by the caller's address.
+
+### burnTokens
+
+```solidity
+function burnTokens(uint amount) external
 ```
-replace the hardhat.config.js code with this code:
 
+The `burnTokens` function enables any token holder to burn their own tokens if they are no longer needed. Token holders can specify the amount of tokens (`amount`) they wish to burn. The function requires that the caller has a sufficient balance of tokens.
+
+### gameStore
+
+```solidity
+function gameStore() public pure returns (string memory)
 ```
-require("@nomicfoundation/hardhat-toolbox");
 
-const FORK_FUJI = false;
-const FORK_MAINNET = false;
-let forkingData = undefined;
+The `gameStore` function provides information about the available items in the in-game store. It returns a string with the options and their corresponding values. Players can choose from these items to redeem with their tokens.
 
-if (FORK_MAINNET) {
-  forkingData = {
-    url: "https://api.avax.network/ext/bc/C/rpcc",
-  };
-}
-if (FORK_FUJI) {
-  forkingData = {
-    url: "https://api.avax-test.network/ext/bc/C/rpc",
-  };
-}
+### redeemTokens
 
-/** @type import('hardhat/config').HardhatUserConfig */
+```solidity
+function redeemTokens(uint choice) external payable
+```
 
-module.exports = {
-  solidity: "0.8.18",
+The `redeemTokens` function allows players to redeem tokens for items in the in-game store. Players need to provide the `choice` parameter, representing the sequence number of the desired item to redeem. The function checks the player's token balance and verifies if it is sufficient for the selected item. If the conditions are met, it transfers the corresponding token value to the contract owner.
 
+### Video Walkthrough
+
+https://www.loom.com/share/16262f96dffa40209235823e1b8697ce?sid=66d2cfee-c160-487c-a6d4-cdf4e7e47082
+
+## Author
   
-  etherscan: {
-    apiKey: "your snowtrace api key here",
-  },
-
-  networks: {
-    hardhat: {
-      gasPrice: 225000000000,
-      chainId: !forkingData ? 43112 : undefined, //Only specify a chainId if we are not forking
-      forking: forkingData
-    },
-
-    fuji: {
-      url: 'https://api.avax-test.network/ext/bc/C/rpc',
-      gasPrice: 225000000000,
-      chainId: 43113,
-      accounts: [
-
-        "private key from metamask here"
-
-      ]
-    },
-
-    mainnet: {
-      url: 'https://api.avax.network/ext/bc/C/rpc',
-      gasPrice: 225000000000,
-      chainId: 43114,
-      accounts: [
-
-        "private key from metamask here"
-
-      ]
-    }
-  }
-
-};
-```
-
-.enter this on vs code terminal: npx hardhat run scripts/deploy.js --network fuji
-.check on snowtrace if contract is successfully deployed on your snowtrace account
-.To get the code working, follow these steps:
-
-.on the left part of the website, right click and create new file and name the file DegenToken.sol
-.paste the code provided above
-.on the left, click on the icon below the magnifying glass icon and it should show another window and press the blue button with the compile DegenToken.sol written on it
-.click on the icon that is below the compile icon and input the address of the contract that you have deployed on the at address below the orange deploy button
-
-## Help
-
-After cloning the github, you will want to do the following to get the code running on your computer.
-
-Inside the project directory, in the terminal type: npm i
-Open two additional terminals in your VS code
-In the second terminal type: npx hardhat node
-In the third terminal, type: npx hardhat run --network localhost scripts/deploy.js
-Back in the first terminal, type npm run dev to launch the front-end.
-After this, the project will be running on your localhost. Typically at http://localhost:3000/
-
-## Authors
-
 Abhay Rana
-
-
